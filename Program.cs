@@ -1,11 +1,17 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using DEV = CH.Regatron.HPPS.Device;
 using UI = CH.Regatron.HPPS.Device.TopCon.ControlInterface;
 using System.Threading.Tasks;
+using System;
+using System.Threading.Tasks;
+using Firebase.Database;
+using Firebase.Database.Query;
+using System.Net;
 
 using TopConAPITest;
 namespace BMS_Master_Control
@@ -16,19 +22,21 @@ namespace BMS_Master_Control
         {
             //Code for opening com port and receiving data
             SerialPort BMSSerialPort = new SerialPort("COM7", 9600, Parity.None, 8, StopBits.One);
-            //SerialPort RegatronSerialPort = new SerialPort("COM8", 9600, Parity.None, 8, StopBits.One);
+            SerialPort RegatronSerialPort = new SerialPort("COM8", 9600, Parity.None, 8, StopBits.One);
 
             int[] voltage = new int[] { 0, 0, 0, 0 };
             int[] temp = new int[] { 0, 0, 0, 0 };
             int[] SOC = new int[] { 0, 0, 0, 0 };
             int current = 0;
-            float[] f_voltage = new float[] { 0, 0, 0, 0 };
+            float[] f_voltage = new float[] { 3.708F, 3.706F, 0, 0 };
             float[] f_temp = new float[] { 0, 0, 0, 0 };
             float[] f_SOC = new float[] { 0, 0, 0, 0 };
             float f_current = 0;
+
             float fake_voltage = 10;
             float fake_current = 2;
             float fake_power = (float)0.02;
+            int time = 10;
 
             char[] delimiter = new char[] { ' ', '\n' };
 
@@ -48,6 +56,7 @@ namespace BMS_Master_Control
             Console.WriteLine(isCharging);
             Console.ReadKey();
 
+            string current_time = DateTime.Now.ToString("yyyy-MM-dd-HH:mm");
             while (true)
             {
 
@@ -62,7 +71,7 @@ namespace BMS_Master_Control
                     Console.WriteLine("sup");
                     toParse = BMSSerialPort.ReadLine();
                 }
-                //string toParse = "V1 36700 28200 8650 V2 37000 30300 8820 V6 36800 29800 8790 V7 37000 31300 9050 I 15000 \n";
+                //string toParse = "V1 36700 28200 8650 V2 37000 30300 8820 V6 36800 29800 8790 V7 37000 31300 9050 I 15000 t 678\n";
                 string[] words = toParse.Split(delimiter);
                 Console.WriteLine(toParse);
 
@@ -82,14 +91,11 @@ namespace BMS_Master_Control
                 }
                 
 
+                Console.WriteLine(f_current);
 
-                /*Console.Write(f_temp[0] + " ");
-                Console.Write(f_SOC[0] + " ");
-                Console.WriteLine(f_current);*/
+                new Program().pushToFirebase(f_voltage, f_temp, f_SOC, f_current, time, isCharging, current_time).Wait();
 
                 Console.WriteLine("--------Closed BMS Serial Port--------");
-
-
 
                 new TC_Update(ref voltVal, ref fake_current, ref fake_power, ref isCharging);
                 //fake_voltage++;
@@ -124,6 +130,45 @@ namespace BMS_Master_Control
             f_soc = Array.ConvertAll(soc, x => (float)x / 100);
             f_cur = ((float)cur) / (float)1000.0;
         }
+
+		private async Task pushToFirebase(float[] voltage, float[] temperature, float[] state_of_charge, float current, int time_elapsed, bool is_charging, string current_time)
+        {
+            var firebaseUrl = "https://battery-monitor-3ffa3.firebaseio.com";
+            var firebase = new FirebaseClient(firebaseUrl);
+            // add new item to list of data and let the client generate new key for you (done offline)
+            StatusData status = new StatusData();
+            status.cell1_voltage = voltage[0];
+            status.cell2_voltage = voltage[1];
+            status.cell7_voltage = voltage[2];
+            status.cell8_voltage = voltage[3];
+
+            status.cell1_soc = state_of_charge[0];
+            status.cell2_soc = state_of_charge[1];
+            status.cell7_soc = state_of_charge[2];
+            status.cell8_soc = state_of_charge[3];
+
+            status.cell1_temp = temperature[0];
+            status.cell2_temp = temperature[1];
+            status.cell7_temp = temperature[2];
+            status.cell8_temp = temperature[3];
+
+            status.current = current;
+            status.pack_voltage = voltage.Sum();
+            status.time_elapsed = time_elapsed;
+            status.is_charging = is_charging;
+
+            await firebase
+			  .Child("status")
+                .PutAsync(status);
+
+            var logs = await firebase
+                    .Child("logs")
+                    .Child(current_time)
+                .PostAsync(status);
+
+            Console.WriteLine("Pushed to Firebase.");
+
+		}
     }
 }
 
