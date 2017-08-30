@@ -21,21 +21,21 @@ namespace BMS_Master_Control
         static void Main(string[] args)
         {
             //Code for opening com port and receiving data
-            SerialPort BMSSerialPort = new SerialPort("COM4", 9600, Parity.None, 8, StopBits.One);
-            SerialPort RegatronSerialPort = new SerialPort("COM8", 9600, Parity.None, 8, StopBits.One);
+            SerialPort BMSSerialPort = new SerialPort("COM5", 9600, Parity.None, 8, StopBits.One);
+            SerialPort RegatronSerialPort = new SerialPort("COM4", 9600, Parity.None, 8, StopBits.One);
 
             int[] voltage = new int[] { 0, 0, 0, 0 };
             int[] temp = new int[] { 0, 0, 0, 0 };
             int[] SOC = new int[] { 0, 0, 0, 0 };
             int current = 0;
-            float[] f_voltage = new float[] { 3.708F, 3.706F, 0, 0 };
+            float[] f_voltage = new float[] { 3.75F, 3.7F, 3.4F, 3.9F };
             float[] f_temp = new float[] { 0, 0, 0, 0 };
             float[] f_SOC = new float[] { 0, 0, 0, 0 };
             float f_current = 0;
 
-            float fake_voltage = 10;
-            float fake_current = 2;
-            float fake_power = (float)0.02;
+            float init_volt = (float)0;
+            float init_current = (float)0;
+            float init_power = (float)0;
             int time = 0;
 
             char[] delimiter = new char[] { ' ', '\n' };
@@ -47,17 +47,24 @@ namespace BMS_Master_Control
             if(c_d == "c")
             {
                 isCharging = true;
+                init_volt = (float)18;
+                init_current = (float)15;
+                init_power = (float)0.3;
             }
             else
             {
                 isCharging = false;
+                init_volt = (float)0;
+                init_current = (float)0;
+                init_power = (float)0;
             }
             
 
-            Console.WriteLine(isCharging);
+            Console.WriteLine("System charging is " + isCharging);
             Console.ReadKey();
 
-
+            new TC_Update(ref init_volt, ref init_current, ref init_power , ref isCharging);
+                        
             BMSSerialPort.Open();
             Console.WriteLine("--------Opened BMS Serial Port--------");
             BMSSerialPort.Write(c_d);
@@ -77,8 +84,8 @@ namespace BMS_Master_Control
                 string[] words = toParse.Split(delimiter);
                 Console.WriteLine(toParse);
 
-                splitToArrays(ref words, ref voltage, ref temp, ref SOC, ref current, ref time);
-                arrayConversion(ref f_voltage, ref f_temp, ref f_SOC, ref f_current, ref voltage, ref temp, ref SOC, ref current);
+                //splitToArrays(ref words, ref voltage, ref temp, ref SOC, ref current, ref time);
+                //arrayConversion(ref f_voltage, ref f_temp, ref f_SOC, ref f_current, ref voltage, ref temp, ref SOC, ref current);
 
                 //BMSSerialPort.Close();
                 Console.WriteLine("Voltages: " + f_voltage[0] + " " + f_voltage[1] + " " +  f_voltage[2] + " " + f_voltage[3]);
@@ -98,12 +105,22 @@ namespace BMS_Master_Control
 
                 new Program().pushToFirebase(f_voltage, f_temp, f_SOC, f_current, time, isCharging, current_time).Wait();
 
-               // Console.WriteLine("--------Closed BMS Serial Port--------");
+                if (voltVal < 3.1)
+                {
+                    BMSSerialPort.Close();
+                    Console.WriteLine("--------Closed BMS Serial Port--------");
+                    float end_voltage = (float)16;
+                    float end_current = (float)7.5;
+                    float end_power = (float)0;
+                    new TC_Update(ref end_voltage, ref end_current, ref end_power, ref isCharging);
+                    Console.WriteLine("Cells Discharged, Press any key to exit");
+                    Console.ReadKey();
+                    Environment.Exit(0);
+                }
 
-               // new TC_Update(ref voltVal, ref fake_current, ref fake_power, ref isCharging);
-                //fake_voltage++;
-                //fake_current++;
-                //fake_power++;
+                // Console.WriteLine("--------Closed BMS Serial Port--------");
+
+
             }
 
         }
@@ -193,7 +210,7 @@ namespace TopConAPITest
             {
                 //Console.Write(" Connect to TopCon on which COMPort? (try 1 if unsure) : ");
                 //int comportNumber = int.Parse(Console.ReadLine());
-                int comportNumber = 8;
+                int comportNumber = 4;
                 Console.Write(" TopCon object created \n Now trying to connect to TopCon on COM [" + comportNumber + "] : ");
                 //-- connect to the TopCon
                 _myTc.Connect(comportNumber);
@@ -209,7 +226,7 @@ namespace TopConAPITest
                 //-- update TopCon configuration (needed 1x)
                 _myTc.UpdateTopConConfigurationWithTopConData();
 
-                switch (isCharging)
+                /*switch (isCharging)
                 {
                     case true:
                         if(ref_voltage > 4 && ref_voltage < 4.18)
@@ -241,25 +258,20 @@ namespace TopConAPITest
                         break;
 
 
-                }
+                }*/
 
                 //Set the TopCon Power Supply Limits. Values in Volts, Amps and kiloWatts respectively
-                //_myTc.SetReferenceVoltage(ref_voltage);
-                //_myTc.SetReferenceCurrent(ref_current);
-                //_myTc.SetReferencePower(ref_power);
-
-                _myTc.SetReferenceVoltage(30);  //Should be 20
-                _myTc.SetReferenceCurrent(1);   //Should be 7.5
-                _myTc.SetReferencePower(0.05);
+                _myTc.SetReferenceVoltage(ref_voltage);
+                _myTc.SetReferenceCurrent(ref_current);
+                _myTc.SetReferencePower(ref_power);
 
                 //Set the Sink Limits (Q4). Values in Volts, Amps and kiloWatts respectively
-                _myTc.SetLimitVoltageQ4(20);
-                _myTc.SetLimitCurrentQ4(-2);
-                _myTc.SetLimitPowerQ4(-0.15);
+                _myTc.SetLimitVoltageQ4(0);
+                _myTc.SetLimitCurrentQ4(0);
+                _myTc.SetLimitPowerQ4(0);
 
                 //DEV.TopConConfiguration myTCconfig = new TopConConfiguration_DummY();
 
-                
                 _myTc.SetPowerON();
                 Console.WriteLine("\n TopCon status is : [{0:D}]]", _myTc.GetSystemState());
                 Console.WriteLine(" TopCon is in RUN? " + _myTc.IsInRunState());
@@ -270,11 +282,11 @@ namespace TopConAPITest
                 Console.WriteLine("+ I: [" + _myTc.GetActualCurrent() + " A]");
                 Console.WriteLine("+ P: [" + _myTc.GetActualPower() + " kW]");
 
-                _myTc.SetPowerOFF();
-                Console.WriteLine("\n TopCon status is : [{0:D}]]", _myTc.GetSystemState());
-                Console.WriteLine(" TopCon is in RUN? " + _myTc.IsInRunState());
-                Console.WriteLine(" TopCon is in Ready?" + _myTc.IsInReadyState());
-                Console.ReadKey();
+                //_myTc.SetPowerOFF();
+                //Console.WriteLine("\n TopCon status is : [{0:D}]]", _myTc.GetSystemState());
+                //Console.WriteLine(" TopCon is in RUN? " + _myTc.IsInRunState());
+                //Console.WriteLine(" TopCon is in Ready?" + _myTc.IsInReadyState());
+                //Console.ReadKey();
 
                 //-- Read reference values for UIP and present them
                 Console.WriteLine("Reference values: ");
@@ -294,10 +306,9 @@ namespace TopConAPITest
                 Console.WriteLine("+ I: [" + _myTc.GetActualCurrent() + " A]");
                 Console.WriteLine("+ P: [" + _myTc.GetActualPower() + " kW]");
 
-                Console.WriteLine(_myTc.GetTopConConfig().MaximumSystemVoltage);
-                
-                Console.WriteLine(_myTc.GetTopConConfig().MaximumSystemCurrent);
-                Console.WriteLine(_myTc.GetTopConConfig().MaximumSystemPower);
+                //Console.WriteLine(_myTc.GetTopConConfig().MaximumSystemVoltage);
+                //Console.WriteLine(_myTc.GetTopConConfig().MaximumSystemCurrent);
+                //Console.WriteLine(_myTc.GetTopConConfig().MaximumSystemPower);
 
                 //-- housekeeping
                 _myTc.Disconnect();

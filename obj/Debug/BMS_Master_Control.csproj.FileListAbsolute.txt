@@ -68,7 +68,6 @@ C:\Users\Emily\Documents\BMS-Master-Control\bin\Debug\System.Reactive.Linq.xml
 C:\Users\Emily\Documents\BMS-Master-Control\bin\Debug\System.Reactive.PlatformServices.xml
 C:\Users\Emily\Documents\BMS-Master-Control\bin\Debug\System.Reactive.Windows.Threading.xml
 C:\Users\Emily\Documents\BMS-Master-Control\bin\Debug\Firebase.pdb
-C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.csprojResolveAssemblyReference.cache
 C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.csproj.BMS_Master_Control.exe.config
 C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.csproj.CoreCompileInputs.cache
 C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.exe
