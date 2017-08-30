@@ -21,7 +21,7 @@ namespace BMS_Master_Control
         static void Main(string[] args)
         {
             //Code for opening com port and receiving data
-            SerialPort BMSSerialPort = new SerialPort("COM7", 9600, Parity.None, 8, StopBits.One);
+            SerialPort BMSSerialPort = new SerialPort("COM4", 9600, Parity.None, 8, StopBits.One);
             SerialPort RegatronSerialPort = new SerialPort("COM8", 9600, Parity.None, 8, StopBits.One);
 
             int[] voltage = new int[] { 0, 0, 0, 0 };
@@ -36,7 +36,7 @@ namespace BMS_Master_Control
             float fake_voltage = 10;
             float fake_current = 2;
             float fake_power = (float)0.02;
-            int time = 10;
+            int time = 0;
 
             char[] delimiter = new char[] { ' ', '\n' };
 
@@ -52,34 +52,36 @@ namespace BMS_Master_Control
             {
                 isCharging = false;
             }
+            
 
             Console.WriteLine(isCharging);
             Console.ReadKey();
+
+
+            BMSSerialPort.Open();
+            Console.WriteLine("--------Opened BMS Serial Port--------");
+            BMSSerialPort.Write(c_d);
 
             string current_time = DateTime.Now.ToString("yyyy-MM-dd-HH:mm");
             while (true)
             {
 
                 float voltVal = 0;
-
-                BMSSerialPort.Open();
-                Console.WriteLine("--------Opened BMS Serial Port--------");
                 string toParse = BMSSerialPort.ReadLine();
                 while (toParse.Length < 50)
                 {
                     BMSSerialPort.DiscardInBuffer();
-                    Console.WriteLine("sup");
                     toParse = BMSSerialPort.ReadLine();
                 }
                 //string toParse = "V1 36700 28200 8650 V2 37000 30300 8820 V6 36800 29800 8790 V7 37000 31300 9050 I 15000 t 678\n";
                 string[] words = toParse.Split(delimiter);
                 Console.WriteLine(toParse);
 
-                splitToArrays(ref words, ref voltage, ref temp, ref SOC, ref current);
+                splitToArrays(ref words, ref voltage, ref temp, ref SOC, ref current, ref time);
                 arrayConversion(ref f_voltage, ref f_temp, ref f_SOC, ref f_current, ref voltage, ref temp, ref SOC, ref current);
 
-                BMSSerialPort.Close();
-                Console.WriteLine(f_voltage[0] + " " + f_voltage[1] + " " +  f_voltage[2] + " " + f_voltage[3]);
+                //BMSSerialPort.Close();
+                Console.WriteLine("Voltages: " + f_voltage[0] + " " + f_voltage[1] + " " +  f_voltage[2] + " " + f_voltage[3]);
 
                 if (isCharging)
                 {
@@ -91,13 +93,14 @@ namespace BMS_Master_Control
                 }
                 
 
-                Console.WriteLine(f_current);
+                Console.WriteLine("Current: " + f_current);
+                Console.WriteLine("Time: " + time);
 
                 new Program().pushToFirebase(f_voltage, f_temp, f_SOC, f_current, time, isCharging, current_time).Wait();
 
-                Console.WriteLine("--------Closed BMS Serial Port--------");
+               // Console.WriteLine("--------Closed BMS Serial Port--------");
 
-                new TC_Update(ref voltVal, ref fake_current, ref fake_power, ref isCharging);
+               // new TC_Update(ref voltVal, ref fake_current, ref fake_power, ref isCharging);
                 //fake_voltage++;
                 //fake_current++;
                 //fake_power++;
@@ -105,11 +108,11 @@ namespace BMS_Master_Control
 
         }
 
-        static void splitToArrays(ref string[] words, ref int[] v, ref int[] t, ref int[] soc, ref int cur)
+        static void splitToArrays(ref string[] words, ref int[] v, ref int[] t, ref int[] soc, ref int cur, ref int tm)
         {
             int arrayCounter = 0;
 
-            for (int i = 1; i < (words.Length - 3); i = i + 4)
+            for (int i = 1; i < (words.Length - 5); i = i + 4)
             {
                 //Arrays of unedited voltages, temps and SOCs from received dataPacket.
                 v[arrayCounter] = Convert.ToInt32(words[i]);
@@ -118,7 +121,9 @@ namespace BMS_Master_Control
                 arrayCounter++;
             }
             //Unedited received current value
-            cur = Convert.ToInt32(words[words.Length - 2]);
+            tm = Convert.ToInt32(words[words.Length - 2]);
+            cur = Convert.ToInt32(words[words.Length - 4]);
+
 
         }
 
@@ -135,7 +140,7 @@ namespace BMS_Master_Control
         {
             var firebaseUrl = "https://battery-monitor-3ffa3.firebaseio.com";
             var firebase = new FirebaseClient(firebaseUrl);
-            // add new item to list of data and let the client generate new key for you (done offline)
+
             StatusData status = new StatusData();
             status.cell1_voltage = voltage[0];
             status.cell2_voltage = voltage[1];
