@@ -19,7 +19,7 @@ namespace BMS_Master_Control
         static void Main(string[] args)
         {
             //Code for opening com port and receiving data
-            SerialPort BMSSerialPort = new SerialPort("COM7", 9600, Parity.None, 8, StopBits.One);
+            SerialPort BMSSerialPort = new SerialPort("COM6", 9600, Parity.None, 8, StopBits.One);
             //SerialPort RegatronSerialPort = new SerialPort("COM6", 9600, Parity.None, 8, StopBits.One);
 
             //Initialising arrays to store raw data
@@ -43,7 +43,7 @@ namespace BMS_Master_Control
             float init_current = (float)0;
             float init_power = (float)0;
             int time = 0;
-            bool isBalanced = false;
+            UInt16 cell_balance = 1;
             bool isFinalStageOfCharging = false;
 
             bool isCharging;
@@ -107,7 +107,7 @@ namespace BMS_Master_Control
                 string[] words = toParse.Split(delimiter);
                 Console.WriteLine(toParse);
 
-                splitToArrays(ref words, ref voltage, ref temp, ref SOC, ref current, ref time, ref isBalanced);
+                splitToArrays(ref words, ref voltage, ref temp, ref SOC, ref current, ref time, ref cell_balance);
                 arrayConversion(ref f_voltage, ref f_temp, ref f_SOC, ref f_current, ref voltage, ref temp, ref SOC, ref current);
 
                 Console.WriteLine("Voltages: " + f_voltage[0] + " " + f_voltage[1] + " " +  f_voltage[2] + " " + f_voltage[3]);
@@ -121,7 +121,7 @@ namespace BMS_Master_Control
                     voltVal = f_voltage.Min();
                 }
                 
-
+                
                 Console.WriteLine("Current: " + f_current);
                 Console.WriteLine("Time: " + time);
 
@@ -189,10 +189,12 @@ namespace BMS_Master_Control
                         }
                     }
 
+                    Console.WriteLine("This is the value of the voltVal: " + voltVal);
+
                     while (isFinalStageOfCharging)
                     {
-                        if ((isBalanced == true) && (voltVal >= 4.2F))
-                            {
+                        if (voltVal >= 4.2F)
+                        {
                             //BMSSerialPort.Close();
                             Console.WriteLine("--------Closed BMS Serial Port--------");
 
@@ -205,11 +207,22 @@ namespace BMS_Master_Control
                             //Last TC update to effectively have cells at "rest"
                             //new TC_Update(ref end_voltage, ref end_current, ref end_power);
 
-                            Console.WriteLine("Cells Charged and Balanced \n To Switch off TopCon Supply Press Enter.");
-                            //Console.WriteLine("Note: Doing so will cause batteries to discharge if electronic load is still connected");
+                            if (cell_balance == (UInt16)0)
+                            {
+                                Console.WriteLine("Cells Charged and Balanced.");
+                                Console.WriteLine("To Switch off TopCon Supply Press Enter.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Cells Charged but not fully balanced.");
+                                Console.WriteLine("To Switch off TopCon Supply Press Enter.");
+                            }
                             Console.ReadKey();
                             //new TC_Switch_Off(switchSupplyOff);
                             Environment.Exit(0);
+                        }else
+                        {
+                            break;
                         }
 
                     }
@@ -225,7 +238,7 @@ namespace BMS_Master_Control
 
         }
 
-        static void splitToArrays(ref string[] words, ref int[] v, ref int[] t, ref int[] soc, ref int cur, ref int tm, ref bool isBal)
+        static void splitToArrays(ref string[] words, ref int[] v, ref int[] t, ref int[] soc, ref int cur, ref int tm, ref UInt16 bal)
         {
             int arrayCounter = 0;
 
@@ -240,14 +253,7 @@ namespace BMS_Master_Control
             //Unedited received current value
             cur = Convert.ToInt32(words[words.Length - 5]);
             tm = Convert.ToInt32(words[words.Length - 3]);
-
-            if(Convert.ToInt32(words[words.Length - 1]) == 1)
-            {
-                isBal = true;
-            }else
-            {
-                isBal = false;
-            }
+            bal = Convert.ToUInt16(words[words.Length - 1]);
 
         }
 
