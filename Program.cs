@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using DEV = CH.Regatron.HPPS.Device;
 using UI = CH.Regatron.HPPS.Device.TopCon.ControlInterface;
 using System.Threading.Tasks;
@@ -19,9 +20,9 @@ namespace BMS_Master_Control
         static void Main(string[] args)
         {
             //Code for opening com port and receiving data
-            SerialPort BMSSerialPort = new SerialPort("COM6", 9600, Parity.None, 8, StopBits.One);
-            //SerialPort RegatronSerialPort = new SerialPort("COM6", 9600, Parity.None, 8, StopBits.One);
 
+            //SerialPort RegatronSerialPort = new SerialPort("COM7", 9600, Parity.None, 8, StopBits.One);
+            
             //Initialising arrays to store raw data
             int[] voltage = new int[] { 0, 0, 0, 0 };
             int[] temp = new int[] {  0, 0, 0, 0 };
@@ -84,25 +85,30 @@ namespace BMS_Master_Control
 
             //Initialisation of Regatron
             //Console.WriteLine(init_volt + " " + init_current + " " + init_power + " " + regatron_reference_current);
-            Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + init_current + " Power: " + init_power);
+            //Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + init_current + " Power: " + init_power);
             Console.ReadKey();
-            //new TC_Update(ref init_volt, ref init_current, ref init_power, ref regatron_reference_current);
+            new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+
+            SerialPort BMSSerialPort = new SerialPort("COM11", 9600, Parity.None, 8, StopBits.One);
 
             BMSSerialPort.Open();
             Console.WriteLine("--------Opened BMS Serial Port--------");
             BMSSerialPort.Write(c_d);
+            Thread.Sleep(1000);
 
             string current_time = DateTime.Now.ToString("yyyy-MM-dd-HH:mm");
             while (true)
             {
-
+                Thread.Sleep(2000);
                 float voltVal = 0;
+                BMSSerialPort.Write("s");
                 string toParse = BMSSerialPort.ReadLine();
                 while (toParse.Length < 52)
                 {
                     BMSSerialPort.DiscardInBuffer();
                     toParse = BMSSerialPort.ReadLine();
                 }
+
                 //string toParse = "V1 36700 28200 8650 V2 37000 30300 8820 V6 36800 29800 8790 V7 37000 31300 9050 I 15000 t 678\n";
                 string[] words = toParse.Split(delimiter);
                 Console.WriteLine(toParse);
@@ -125,6 +131,9 @@ namespace BMS_Master_Control
                 Console.WriteLine("Current: " + f_current);
                 Console.WriteLine("Time: " + time);
 
+                while (Console.KeyAvailable)
+                    Console.ReadKey(true);
+
                 new Program().pushToFirebase(f_voltage, f_temp, f_SOC, f_current, time, isCharging, current_time).Wait();
 
                 //Stop discharging if voltage is below threshold
@@ -139,19 +148,19 @@ namespace BMS_Master_Control
                     float end_power = (float)0;
 
                     Console.WriteLine("What values regatron will receive: Voltage: " + end_voltage + " Current: " + end_current + " Power: " + end_power);
-                  
+
                     //Last TC update to effectively have cells at "rest"
-                    //new TC_Update(ref end_voltage, ref end_current, ref end_power, ref regatron_reference_current);
+                    new TC_Update(ref end_voltage, ref end_current, ref end_power);
 
                     Console.WriteLine("Cells Discharged. To Switch off TopCon Supply Press Enter.");
                     Console.WriteLine("Note: Doing so will cause batteries to discharge if electronic load is still connected");
                     Console.ReadKey();
-                    //new TC_Switch_Off(switchSupplyOff);
+                    new TC_Switch_Off(switchSupplyOff);
                     Environment.Exit(0);
                 }
 
                 //Stop charging if voltage is above threshold
-                if ((isCharging) && (voltVal > 4.15F))
+                if ((isCharging) && (voltVal > 4.18F))
                 {
 
                     while (!isFinalStageOfCharging)
@@ -159,29 +168,42 @@ namespace BMS_Master_Control
 
                         if (regatron_update_current > 1.5F)
                         {
+                            BMSSerialPort.Close();
+                            Console.WriteLine("--------Closed BMS Serial Port--------");
                             regatron_update_current = regatron_update_current - 1;
                             Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
-                            //new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            Console.WriteLine("--------Opened BMS Serial Port--------");
+                            BMSSerialPort.Open();
                         }
                         else if ((regatron_update_current > 1) && (regatron_update_current <= 1.5F))
                         {
+                            BMSSerialPort.Close();
                             regatron_update_current = 1;
                             Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
-                            //new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            Console.WriteLine("--------Opened BMS Serial Port--------");
+                            BMSSerialPort.Open();
                         }
                         else if ((regatron_update_current > 0.5) && (regatron_update_current <= 1))
                         {
+                            BMSSerialPort.Close();
                             regatron_update_current = (float)0.5;
                             Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
-                            //new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            Console.WriteLine("--------Opened BMS Serial Port--------");
+                            BMSSerialPort.Open();
                         }
                         else if ((regatron_update_current <= (float)0.5) && (voltVal >= 4.19))
                         {
-                            regatron_update_current = (float)0.1;
+                            BMSSerialPort.Close();
+                            regatron_update_current = (float)0.15;
                             isFinalStageOfCharging = true;
                             Console.WriteLine("Final Stage of Charging");
                             Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
-                            //new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            Console.WriteLine("--------Opened BMS Serial Port--------");
+                            BMSSerialPort.Open();
                         }
                         else
                         {
@@ -195,7 +217,7 @@ namespace BMS_Master_Control
                     {
                         if (voltVal >= 4.2F)
                         {
-                            //BMSSerialPort.Close();
+                            BMSSerialPort.Close();
                             Console.WriteLine("--------Closed BMS Serial Port--------");
 
                             bool switchSupplyOff = true;
@@ -205,7 +227,7 @@ namespace BMS_Master_Control
 
                             Console.WriteLine("What values regatron will receive: Voltage: " + end_voltage + " Current: " + end_current + " Power: " + end_power);
                             //Last TC update to effectively have cells at "rest"
-                            //new TC_Update(ref end_voltage, ref end_current, ref end_power);
+                            new TC_Update(ref end_voltage, ref end_current, ref end_power);
 
                             if (cell_balance == (UInt16)0)
                             {
@@ -218,7 +240,7 @@ namespace BMS_Master_Control
                                 Console.WriteLine("To Switch off TopCon Supply Press Enter.");
                             }
                             Console.ReadKey();
-                            //new TC_Switch_Off(switchSupplyOff);
+                            new TC_Switch_Off(switchSupplyOff);
                             Environment.Exit(0);
                         }else
                         {
@@ -348,6 +370,7 @@ namespace TopConAPI
                 //DEV.TopConConfiguration myTCconfig = new TopConConfiguration_DummY();
 
                 _myTc.SetPowerON();
+
                 Console.WriteLine("\n TopCon status is : [{0:D}]]", _myTc.GetSystemState());
                 Console.WriteLine(" TopCon is in RUN? " + _myTc.IsInRunState());
                 Console.WriteLine(" TopCon is in Ready?" + _myTc.IsInReadyState());
@@ -364,17 +387,22 @@ namespace TopConAPI
                 Console.WriteLine("+ I: [" + _myTc.GetActualCurrent() + " A]");
                 Console.WriteLine("+ P: [" + _myTc.GetActualPower() + " kW]");
 
+                //_myTc.SetPowerOFF();
+
                 //-- housekeeping
                 _myTc.Disconnect();
 
+                //Console.WriteLine("If disconnected the value should be zero: " + _myTc.GetConnectedCOMPortNumber());
                 Console.WriteLine("\n now disconnected! ");
+
             }
             catch (Exception e) //-- only in case something failed!
             {
                 Console.WriteLine(" An error occurred: [" + e.Message + "] \n-->> ending program.");
             }
-            Console.WriteLine(" \n Press enter to leave: ");
-            Console.ReadLine();
+            //Console.WriteLine(" \n Press enter to leave: ");
+            while (Console.KeyAvailable)
+                Console.ReadKey(true);
         } //-- of constructor & functionality.
     } //-- of class
 

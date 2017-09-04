@@ -24,30 +24,8 @@ C:/Users/User/Documents/Visual Studio 2015/Projects/BMS_Master_Control/BMS_Maste
 /Users/kanocarra/Projects/Part IV/BMS-Master-Control/obj/Debug/BMS_Master_Control.csproj.CoreCompileInputs.cache
 /Users/kanocarra/Projects/Part IV/BMS-Master-Control/obj/Debug/BMS_Master_Control.exe
 /Users/kanocarra/Projects/Part IV/BMS-Master-Control/obj/Debug/BMS_Master_Control.pdb
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\BMS_Master_Control.exe.config
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.exe
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.pdb
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\BMS_Master_Control.exe
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\BMS_Master_Control.pdb
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Firebase.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Newtonsoft.Json.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Core.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Interfaces.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Linq.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.PlatformServices.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Windows.Threading.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Runtime.InteropServices.RuntimeInformation.dll
 C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\TcioWrapper.dll
 C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\TopConAPI.dll
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Newtonsoft.Json.xml
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Interfaces.xml
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Core.xml
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Linq.xml
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.PlatformServices.xml
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Windows.Threading.xml
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Firebase.pdb
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.csprojResolveAssemblyReference.cache
-C:\Users\User\Documents\Visual Studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.csproj.BMS_Master_Control.exe.config
 C:\Users\Emily\Documents\BMS-Master-Control\bin\Debug\BMS_Master_Control.exe.config
 C:\Users\Emily\Documents\BMS-Master-Control\bin\Debug\BMS_Master_Control.exe
 C:\Users\Emily\Documents\BMS-Master-Control\bin\Debug\BMS_Master_Control.pdb
@@ -72,3 +50,25 @@ C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.csproj.
 C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.csproj.CoreCompileInputs.cache
 C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.exe
 C:\Users\Emily\Documents\BMS-Master-Control\obj\Debug\BMS_Master_Control.pdb
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\BMS_Master_Control.exe.config
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\BMS_Master_Control.exe
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\BMS_Master_Control.pdb
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Firebase.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Newtonsoft.Json.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Core.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Interfaces.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Linq.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.PlatformServices.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Windows.Threading.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Runtime.InteropServices.RuntimeInformation.dll
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Newtonsoft.Json.xml
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Interfaces.xml
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Core.xml
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Linq.xml
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.PlatformServices.xml
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\System.Reactive.Windows.Threading.xml
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\bin\Debug\Firebase.pdb
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.csprojResolveAssemblyReference.cache
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.csproj.BMS_Master_Control.exe.config
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.exe
+C:\Users\User\documents\visual studio 2015\Projects\BMS_Master_Control\BMS_Master_Control\obj\Debug\BMS_Master_Control.pdb
