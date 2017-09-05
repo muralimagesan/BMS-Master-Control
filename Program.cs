@@ -89,7 +89,7 @@ namespace BMS_Master_Control
             Console.ReadKey();
             new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
 
-            SerialPort BMSSerialPort = new SerialPort("COM11", 9600, Parity.None, 8, StopBits.One);
+            SerialPort BMSSerialPort = new SerialPort("COM7", 9600, Parity.None, 8, StopBits.One);
 
             BMSSerialPort.Open();
             Console.WriteLine("--------Opened BMS Serial Port--------");
@@ -99,7 +99,7 @@ namespace BMS_Master_Control
             string current_time = DateTime.Now.ToString("yyyy-MM-dd-HH:mm");
             while (true)
             {
-                Thread.Sleep(2000);
+                Thread.Sleep(3000);
                 float voltVal = 0;
                 BMSSerialPort.Write("s");
                 string toParse = BMSSerialPort.ReadLine();
@@ -166,7 +166,7 @@ namespace BMS_Master_Control
                     while (!isFinalStageOfCharging)
                     {
 
-                        if (regatron_update_current > 1.5F)
+                        if (regatron_update_current > 3.5F)
                         {
                             BMSSerialPort.Close();
                             Console.WriteLine("--------Closed BMS Serial Port--------");
@@ -175,35 +175,39 @@ namespace BMS_Master_Control
                             new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
                             Console.WriteLine("--------Opened BMS Serial Port--------");
                             BMSSerialPort.Open();
+                            break;
                         }
-                        else if ((regatron_update_current > 1) && (regatron_update_current <= 1.5F))
+                        else if ((regatron_update_current > 1.5) && (voltVal >= 4.19))
                         {
                             BMSSerialPort.Close();
-                            regatron_update_current = 1;
+                            regatron_update_current = regatron_update_current - 1;
                             Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
                             new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
                             Console.WriteLine("--------Opened BMS Serial Port--------");
                             BMSSerialPort.Open();
+                            break;
                         }
-                        else if ((regatron_update_current > 0.5) && (regatron_update_current <= 1))
+                        else if ((regatron_update_current > 1) && (voltVal >= 4.19))
+                        {
+                            BMSSerialPort.Close();
+                            regatron_update_current = (float)1;
+                            Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
+                            new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
+                            Console.WriteLine("--------Opened BMS Serial Port--------");
+                            BMSSerialPort.Open();
+                            break;
+                        }
+                        else if ((regatron_update_current <= (float)1) && (voltVal >= 4.195))
                         {
                             BMSSerialPort.Close();
                             regatron_update_current = (float)0.5;
-                            Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
-                            new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
-                            Console.WriteLine("--------Opened BMS Serial Port--------");
-                            BMSSerialPort.Open();
-                        }
-                        else if ((regatron_update_current <= (float)0.5) && (voltVal >= 4.19))
-                        {
-                            BMSSerialPort.Close();
-                            regatron_update_current = (float)0.15;
                             isFinalStageOfCharging = true;
                             Console.WriteLine("Final Stage of Charging");
                             Console.WriteLine("What values regatron will receive: Voltage: " + init_volt + " Current: " + regatron_update_current + " Power: " + init_power);
                             new TC_Update(ref init_volt, ref regatron_update_current, ref init_power);
                             Console.WriteLine("--------Opened BMS Serial Port--------");
                             BMSSerialPort.Open();
+                            break;
                         }
                         else
                         {
@@ -343,7 +347,7 @@ namespace TopConAPI
             //-- ask for COMport to be used
             try
             {
-                int comportNumber = 6;
+                int comportNumber = 10;
                 Console.Write(" TopCon object created \n Now trying to connect to TopCon on COM [" + comportNumber + "] : ");
                 //-- connect to the TopCon
                 _myTc.Connect(comportNumber);
@@ -368,8 +372,10 @@ namespace TopConAPI
                 _myTc.SetLimitPowerQ4(0);
 
                 //DEV.TopConConfiguration myTCconfig = new TopConConfiguration_DummY();
-
-                _myTc.SetPowerON();
+                if (!_myTc.IsPowerON())
+                {
+                    _myTc.SetPowerON();
+                }
 
                 Console.WriteLine("\n TopCon status is : [{0:D}]]", _myTc.GetSystemState());
                 Console.WriteLine(" TopCon is in RUN? " + _myTc.IsInRunState());
@@ -418,7 +424,7 @@ namespace TopConAPI
             //-- ask for COMport to be used
             try
             {
-                int comportNumber = 6;
+                int comportNumber = 10;
                 //-- connect to the TopCon
                 _myTc.Connect(comportNumber);
 
